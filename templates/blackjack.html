@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Блэкджек — Lucky 38{% endblock %}
+
+{% block content %}
+<section class="game-page blackjack-section">
+    <div class="container">
+        <div class="game-page-heading">
+            <div>
+                <p class="section-label">Карточный стол</p>
+                <h1>Блэкджек</h1>
+                <p>Наберите 21 очко или окажитесь ближе к 21, чем дилер.</p>
+            </div>
+            <div class="game-balance-panel">
+                <span>Баланс</span><strong>{{ g.user['balance'] }} крышек</strong>
+                <span>Казна</span><strong>{{ casino['treasury'] }} крышек</strong>
+            </div>
+        </div>
+
+        {% if last_game %}
+            <div class="blackjack-result blackjack-result-{{ last_game.result }}">
+                <h2>{{ last_game.message }}</h2>
+                <p>Выплата: <strong>{{ last_game.payout }} крышек</strong></p>
+            </div>
+            <div class="blackjack-table finished-table">
+                <div class="hand-area">
+                    <h3>Дилер — {{ last_game.dealer_value }}</h3>
+                    <div class="card-row">
+                        {% for card in last_game.dealer_cards %}
+                            <div class="playing-card {% if card.red %}red-card{% endif %}"><b>{{ card.rank }}</b><span>{{ card.suit }}</span></div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="table-emblem">LUCKY<br>38</div>
+                <div class="hand-area">
+                    <h3>Игрок — {{ last_game.player_value }}</h3>
+                    <div class="card-row">
+                        {% for card in last_game.player_cards %}
+                            <div class="playing-card {% if card.red %}red-card{% endif %}"><b>{{ card.rank }}</b><span>{{ card.suit }}</span></div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" class="blackjack-start-form blackjack-replay-form">
+                <label for="repeat-bet">Следующая ставка</label>
+                <select name="bet" id="repeat-bet">
+                    {% for bet in bets %}
+                        <option value="{{ bet }}" {% if bet == last_game.bet %}selected{% endif %}>{{ bet }} крышек</option>
+                    {% endfor %}
+                </select>
+                <button class="button button-primary" name="action" value="start"
+                        {% if casino['treasury'] <= 0 or g.user['balance'] < bets[0] %}disabled{% endif %}>
+                    Играть ещё
+                </button>
+            </form>
+        {% elif game %}
+            <div class="blackjack-table">
+                <div class="hand-area">
+                    <h3>Дилер — {{ dealer_visible_value }} + скрытая карта</h3>
+                    <div class="card-row">
+                        <div class="playing-card card-back"><span>38</span></div>
+                        {% for card in dealer_cards[1:] %}
+                            <div class="playing-card {% if card.red %}red-card{% endif %}"><b>{{ card.rank }}</b><span>{{ card.suit }}</span></div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="table-emblem">Ставка<br>{{ game.bet }}</div>
+                <div class="hand-area">
+                    <h3>Игрок — {{ player_value }}</h3>
+                    <div class="card-row">
+                        {% for card in player_cards %}
+                            <div class="playing-card {% if card.red %}red-card{% endif %}"><b>{{ card.rank }}</b><span>{{ card.suit }}</span></div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <form method="post" class="blackjack-actions">
+                <button class="button button-primary" name="action" value="hit">Ещё</button>
+                <button class="button button-secondary" name="action" value="stand">Хватит</button>
+                <button class="button button-secondary" name="action" value="double" {% if player_cards|length != 2 or g.user['balance'] < game.bet %}disabled{% endif %}>Удвоить</button>
+            </form>
+        {% else %}
+            <div class="blackjack-start-card">
+                <div class="table-emblem large-emblem">21</div>
+                <form method="post" class="blackjack-start-form">
+                    <label for="bet">Размер ставки</label>
+                    <select name="bet" id="bet">
+                        {% for bet in bets %}<option value="{{ bet }}" {% if bet == selected_bet %}selected{% endif %}>{{ bet }} крышек</option>{% endfor %}
+                    </select>
+                    <button class="button button-primary" name="action" value="start" {% if casino['treasury'] <= 0 %}disabled{% endif %}>Раздать карты</button>
+                </form>
+            </div>
+        {% endif %}
+
+        <div class="slots-info-grid">
+            <article class="payout-card">
+                <h2>Правила</h2>
+                <div class="payout-row"><span>Обычная победа</span><strong>×2</strong></div>
+                <div class="payout-row"><span>Блэкджек</span><strong>×2,5</strong></div>
+                <div class="payout-row"><span>Ничья</span><strong>Возврат ставки</strong></div>
+                <div class="payout-row"><span>Дилер берёт карты</span><strong>До 17</strong></div>
+            </article>
+            <article class="history-card">
+                <h2>Последние партии</h2>
+                {% for item in recent_games %}
+                    <div class="history-row"><span>{{ item.bet }} крышек — {{ item.result }}</span><strong class="{% if item.payout > item.bet %}history-win{% endif %}">{{ item.payout }}</strong></div>
+                {% else %}<p class="empty-history">Пока партий нет.</p>{% endfor %}
+            </article>
+        </div>
+    </div>
+</section>
+{% endblock %}

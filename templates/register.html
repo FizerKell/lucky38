@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация — Lucky 38{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-card">
+        <p class="section-label">Новый посетитель</p>
+        <h1>Регистрация</h1>
+        <p class="auth-description">
+            Создайте аккаунт и получите 1 000 стартовых крышек.
+        </p>
+
+        <form method="post" class="auth-form">
+            <label for="username">Логин</label>
+            <input
+                id="username"
+                name="username"
+                type="text"
+                minlength="3"
+                maxlength="30"
+                value="{{ request.form.get('username', '') }}"
+                autocomplete="username"
+                required
+            >
+
+            <label for="password">Пароль</label>
+            <input
+                id="password"
+                name="password"
+                type="password"
+                minlength="6"
+                autocomplete="new-password"
+                required
+            >
+
+            <label for="password_confirm">Повторите пароль</label>
+            <input
+                id="password_confirm"
+                name="password_confirm"
+                type="password"
+                minlength="6"
+                autocomplete="new-password"
+                required
+            >
+
+            <button class="button button-primary form-button" type="submit">
+                Создать аккаунт
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            Уже зарегистрированы?
+            <a href="{{ url_for('login') }}">Войти</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

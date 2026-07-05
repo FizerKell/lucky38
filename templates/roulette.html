@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Рулетка — Lucky 38{% endblock %}
+
+{% block content %}
+<section class="slots-section roulette-section">
+    <div class="container">
+        <div class="game-page-heading">
+            <div>
+                <p class="section-label">Игровой зал Lucky 38</p>
+                <h1>Европейская рулетка</h1>
+                <p class="game-description">
+                    Выберите тип ставки и размер ставки. На колесе находятся числа от 0 до 36,
+                    а зелёный ноль не относится к красному, чёрному, чётному или нечётному.
+                </p>
+            </div>
+
+            <div class="game-balance-panel">
+                <span>Ваш баланс</span>
+                <strong>{{ g.user['balance'] }} крышек</strong>
+                <span>Казна казино</span>
+                <strong>{{ casino['treasury'] }} крышек</strong>
+            </div>
+        </div>
+
+        <div class="roulette-table">
+            <div class="roulette-result-panel">
+                <div class="roulette-wheel-ring">
+                    {% if result_number is not none %}
+                        <div class="roulette-ball roulette-{{ result_color }}">{{ result_number }}</div>
+                    {% else %}
+                        <div class="roulette-ball roulette-empty">?</div>
+                    {% endif %}
+                </div>
+
+                {% if result_number is not none %}
+                    <div class="spin-result {% if payout > 0 %}spin-win{% else %}spin-loss{% endif %}">
+                        <strong>Выпало {{ result_number }} —
+                            {% if result_color == 'red' %}красное{% elif result_color == 'black' %}чёрное{% else %}зелёное{% endif %}
+                        </strong>
+                        <span>{{ result_message }}</span>
+                        {% if payout > 0 %}
+                            <span>Выплата: {{ payout }} крышек · ×{{ multiplier }}</span>
+                        {% else %}
+                            <span>Ставка проиграна</span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <form class="roulette-form" method="post" id="roulette-form">
+                <div class="form-field">
+                    <label for="bet">Размер ставки</label>
+                    <select id="bet" name="bet">
+                        {% for bet in bets %}
+                            <option value="{{ bet }}" {% if bet == selected_bet %}selected{% endif %}>
+                                {{ bet }} крышек
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="bet_type">Тип ставки</label>
+                    <select id="bet_type" name="bet_type">
+                        <option value="color" {% if selected_type == 'color' %}selected{% endif %}>Цвет</option>
+                        <option value="number" {% if selected_type == 'number' %}selected{% endif %}>Конкретное число</option>
+                        <option value="parity" {% if selected_type == 'parity' %}selected{% endif %}>Чётность</option>
+                        <option value="range" {% if selected_type == 'range' %}selected{% endif %}>Диапазон</option>
+                        <option value="dozen" {% if selected_type == 'dozen' %}selected{% endif %}>Дюжина</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="bet_value">Вариант ставки</label>
+                    <select id="bet_value" name="bet_value"></select>
+                </div>
+
+                <button class="button button-primary roulette-button" type="submit"
+                        {% if g.user['balance'] < 10 or casino['treasury'] <= 0 %}disabled{% endif %}>
+                    Запустить рулетку
+                </button>
+            </form>
+        </div>
+
+        <div class="roulette-number-board" aria-label="Числа европейской рулетки">
+            <span class="number-cell green-cell">0</span>
+            {% for number in range(1, 37) %}
+                <span class="number-cell {% if number in [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36] %}red-cell{% else %}black-cell{% endif %}">
+                    {{ number }}
+                </span>
+            {% endfor %}
+        </div>
+
+        <div class="slots-info-grid">
+            <article class="payout-card">
+                <p class="section-label">Таблица выплат</p>
+                <h2>Ставки</h2>
+                <div class="payout-row"><span>Конкретное число</span><strong>×36</strong></div>
+                <div class="payout-row"><span>Красное или чёрное</span><strong>×2</strong></div>
+                <div class="payout-row"><span>Чётное или нечётное</span><strong>×2</strong></div>
+                <div class="payout-row"><span>1–18 или 19–36</span><strong>×2</strong></div>
+                <div class="payout-row"><span>Дюжина</span><strong>×3</strong></div>
+            </article>
+
+            <article class="history-card">
+                <p class="section-label">Последние вращения</p>
+                <h2>История</h2>
+                {% if recent_games %}
+                    <div class="compact-history">
+                        {% for game in recent_games %}
+                            <div class="history-row roulette-history-row">
+                                <span class="history-number roulette-{{ game['color'] }}">{{ game['number'] }}</span>
+                                <span>Ставка {{ game['bet'] }}</span>
+                                <strong class="{% if game['payout'] > 0 %}history-win{% endif %}">
+                                    {% if game['payout'] > 0 %}+{{ game['payout'] }}{% else %}0{% endif %}
+                                </strong>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="empty-history">Вы ещё не запускали рулетку.</p>
+                {% endif %}
+            </article>
+        </div>
+    </div>
+</section>
+
+<script>
+const betOptions = {
+    color: [
+        ["red", "Красное"],
+        ["black", "Чёрное"]
+    ],
+    number: Array.from({length: 37}, (_, number) => [String(number), String(number)]),
+    parity: [
+        ["even", "Чётное"],
+        ["odd", "Нечётное"]
+    ],
+    range: [
+        ["low", "1–18"],
+        ["high", "19–36"]
+    ],
+    dozen: [
+        ["first", "1-я дюжина: 1–12"],
+        ["second", "2-я дюжина: 13–24"],
+        ["third", "3-я дюжина: 25–36"]
+    ]
+};
+
+const typeSelect = document.getElementById("bet_type");
+const valueSelect = document.getElementById("bet_value");
+const savedValue = {{ selected_value|tojson }};
+
+function updateBetValues(preferredValue = null) {
+    const options = betOptions[typeSelect.value] || [];
+    valueSelect.innerHTML = "";
+
+    options.forEach(([value, label]) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        if (value === preferredValue) option.selected = true;
+        valueSelect.appendChild(option);
+    });
+}
+
+typeSelect.addEventListener("change", () => updateBetValues());
+updateBetValues(savedValue);
+</script>
+{% endblock %}

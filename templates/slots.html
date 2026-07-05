@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Игровые автоматы — Lucky 38{% endblock %}
+
+{% block content %}
+<section class="slots-section">
+    <div class="container">
+        <div class="game-page-heading">
+            <div>
+                <p class="section-label">Игровой зал Lucky 38</p>
+                <h1>Игровые автоматы</h1>
+                <p class="game-description">
+                    Выберите ставку и запустите барабаны. Ставка списывается перед
+                    вращением, а выигрыш выплачивается из казны казино.
+                </p>
+            </div>
+
+            <div class="game-balance-panel">
+                <span>Ваш баланс</span>
+                <strong>{{ g.user['balance'] }} крышек</strong>
+                <span>Казна казино</span>
+                <strong>{{ casino['treasury'] }} крышек</strong>
+            </div>
+        </div>
+
+        <div class="slot-machine">
+            <div class="machine-title">LUCKY 38 · ATOMIC JACKPOT</div>
+
+            <div class="slot-reels" aria-label="Результат вращения">
+                {% if result %}
+                    {% for symbol in result %}
+                        <div class="slot-reel">
+                            <span class="slot-symbol">{{ symbol['icon'] }}</span>
+                            <small>{{ symbol['label'] }}</small>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="slot-reel"><span class="slot-symbol">?</span><small>Барабан 1</small></div>
+                    <div class="slot-reel"><span class="slot-symbol">?</span><small>Барабан 2</small></div>
+                    <div class="slot-reel"><span class="slot-symbol">?</span><small>Барабан 3</small></div>
+                {% endif %}
+            </div>
+
+            {% if result %}
+                <div class="spin-result {% if payout > 0 %}spin-win{% else %}spin-loss{% endif %}">
+                    <strong>{{ spin_message }}</strong>
+                    {% if payout > 0 %}
+                        <span>Выплата: {{ payout }} крышек{% if multiplier %} · множитель ×{{ multiplier }}{% endif %}</span>
+                    {% else %}
+                        <span>Вы потеряли ставку: {{ selected_bet }} крышек</span>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <form class="slot-controls" method="post">
+                <label for="bet">Размер ставки</label>
+                <select id="bet" name="bet">
+                    {% for bet in bets %}
+                        <option value="{{ bet }}" {% if bet == selected_bet %}selected{% endif %}>
+                            {{ bet }} крышек
+                        </option>
+                    {% endfor %}
+                </select>
+                <button class="button button-primary spin-button" type="submit"
+                        {% if g.user['balance'] < 10 or casino['treasury'] <= 0 %}disabled{% endif %}>
+                    Крутить барабаны
+                </button>
+            </form>
+        </div>
+
+        <div class="slots-info-grid">
+            <article class="payout-card">
+                <p class="section-label">Таблица выплат</p>
+                <h2>Комбинации</h2>
+                <div class="payout-row"><span>☢ ☢ ☢</span><strong>×10</strong></div>
+                <div class="payout-row"><span>7 7 7</span><strong>×7</strong></div>
+                <div class="payout-row"><span>🥤 🥤 🥤</span><strong>×5</strong></div>
+                <div class="payout-row"><span>Любые три одинаковых</span><strong>×4</strong></div>
+                <div class="payout-row"><span>Две вишни</span><strong>×2</strong></div>
+            </article>
+
+            <article class="history-card">
+                <p class="section-label">Последние вращения</p>
+                <h2>История</h2>
+                {% if recent_games %}
+                    <div class="compact-history">
+                        {% for game in recent_games %}
+                            <div class="history-row">
+                                <span>Ставка {{ game['bet'] }}</span>
+                                <strong class="{% if game['payout'] > 0 %}history-win{% endif %}">
+                                    {% if game['payout'] > 0 %}+{{ game['payout'] }}{% else %}0{% endif %}
+                                </strong>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="empty-history">Вы ещё не запускали автомат.</p>
+                {% endif %}
+            </article>
+        </div>
+    </div>
+</section>
+{% endblock %}

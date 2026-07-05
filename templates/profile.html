@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль — Lucky 38{% endblock %}
+
+{% block content %}
+<section class="profile-section">
+    <div class="container">
+        <p class="section-label">Личный кабинет</p>
+        <h1>Добро пожаловать, {{ g.user['username'] }}</h1>
+
+        <div class="profile-grid">
+            <article class="profile-card balance-card">
+                <span class="status-label">Ваш баланс</span>
+                <strong>{{ g.user['balance'] }} крышек</strong>
+                <p>Этот баланс будет использоваться для ставок во всех играх.</p>
+            </article>
+
+            <article class="profile-card">
+                <span class="status-label">Казна казино</span>
+                <strong>{{ casino['treasury'] }} крышек</strong>
+                <p>Ваша цель — забрать все крышки Lucky 38.</p>
+            </article>
+
+            <article class="profile-card">
+                <span class="status-label">Дата регистрации</span>
+                <strong>{{ g.user['created_at'] }}</strong>
+                <p>Игровая статистика появится после добавления игр.</p>
+            </article>
+        </div>
+
+        <div class="profile-actions">
+            <a class="button button-primary" href="{{ url_for('index') }}#games">
+                Перейти к играм
+            </a>
+            <a class="button button-secondary" href="{{ url_for('logout') }}">
+                Выйти из аккаунта
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Вход — Lucky 38{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-card">
+        <p class="section-label">Возвращение в казино</p>
+        <h1>Вход</h1>
+        <p class="auth-description">
+            Войдите, чтобы продолжить игру со своим балансом.
+        </p>
+
+        <form method="post" class="auth-form">
+            <label for="username">Логин</label>
+            <input
+                id="username"
+                name="username"
+                type="text"
+                value="{{ request.form.get('username', '') }}"
+                autocomplete="username"
+                required
+            >
+
+            <label for="password">Пароль</label>
+            <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+            >
+
+            <button class="button button-primary form-button" type="submit">
+                Войти
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            Нет аккаунта?
+            <a href="{{ url_for('register') }}">Зарегистрироваться</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

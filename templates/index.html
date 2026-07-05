@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Lucky 38 — Главное казино Нью-Вегаса{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container hero-content">
+        <p class="eyebrow">Добро пожаловать в Нью-Вегас</p>
+        <h1>LUCKY 38</h1>
+        <p class="hero-text">
+            Испытайте удачу в легендарном казино мистера Хауса.
+            Делайте ставки, выигрывайте крышки и попробуйте опустошить казну казино.
+        </p>
+
+        <div class="hero-actions">
+            {% if g.user %}
+                <a class="button button-primary" href="#games">Перейти к играм</a>
+                <a class="button button-secondary" href="{{ url_for('profile') }}">Мой профиль</a>
+            {% else %}
+                <a class="button button-primary" href="{{ url_for('register') }}">Начать играть</a>
+                <a class="button button-secondary" href="{{ url_for('login') }}">Войти</a>
+            {% endif %}
+        </div>
+
+        <div class="casino-status">
+            <div>
+                <span class="status-label">Ваш баланс</span>
+                {% if g.user %}
+                    <strong>{{ g.user['balance'] }} крышек</strong>
+                {% else %}
+                    <strong>Войдите в аккаунт</strong>
+                {% endif %}
+            </div>
+            <div>
+                <span class="status-label">Казна Lucky 38</span>
+                <strong>{{ casino['treasury'] }} крышек</strong>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="games-section" id="games">
+    <div class="container">
+        <p class="section-label">Игровой зал</p>
+        <h2>Выберите игру</h2>
+
+        <div class="games-grid">
+            <article class="game-card">
+                <div class="game-icon">21</div>
+                <h3>Блэкджек</h3>
+                <p>
+                    Наберите 21 очко или приблизьтесь к нему сильнее дилера.
+                </p>
+                <a class="button button-primary" href="{{ url_for('blackjack') }}">Играть</a>
+            </article>
+
+            <article class="game-card featured-card">
+                <div class="game-icon">777</div>
+                <h3>Игровые автоматы</h3>
+                <p>
+                    Запустите барабаны и соберите выигрышную комбинацию.
+                </p>
+                <a class="button button-primary" href="{{ url_for('slots') }}">Играть</a>
+            </article>
+
+            <article class="game-card">
+                <div class="game-icon">0</div>
+                <h3>Рулетка</h3>
+                <p>
+                    Сделайте ставку на число, цвет, чётность или диапазон.
+                </p>
+                <a class="button button-primary" href="{{ url_for('roulette') }}">Играть</a>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="about-section" id="about">
+    <div class="container about-grid">
+        <div>
+            <p class="section-label">О проекте</p>
+            <h2>Сможете ли вы разорить казино?</h2>
+        </div>
+
+        <div class="about-text">
+            <p>
+                У каждого игрока будет собственный баланс, а у казино — общая казна.
+                Проигранные крышки попадают в казну, а выигрыши выплачиваются из неё.
+            </p>
+            <p>
+                Игра продолжается, пока у игрока остаются крышки и Lucky 38 способен
+                выплачивать выигрыши.
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

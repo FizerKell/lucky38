@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Lucky 38{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="header">
+        <div class="container header-inner">
+            <a class="logo" href="{{ url_for('index') }}">LUCKY 38</a>
+
+            <nav class="navigation">
+                <a href="{{ url_for('index') }}">Главная</a>
+                <a href="{{ url_for('index') }}#games">Игры</a>
+                <a href="{{ url_for('index') }}#about">О казино</a>
+
+                {% if g.user %}
+                    <a class="balance-link" href="{{ url_for('profile') }}">
+                        {{ g.user['balance'] }} крышек
+                    </a>
+                    <a href="{{ url_for('logout') }}">Выйти</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Войти</a>
+                    <a class="nav-button" href="{{ url_for('register') }}">Регистрация</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-container container">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Lucky 38 — учебный проект на Flask</p>
+            <p>Проект создан по мотивам Fallout: New Vegas</p>
+        </div>
+    </footer>
+</body>
+</html>
